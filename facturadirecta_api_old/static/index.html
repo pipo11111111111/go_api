@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        button {
+            margin: 10px 0;
+            display: block;
+            font-size: 16px;
+            padding: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #output {
+            margin-top: 20px;
+            white-space: pre-wrap;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+
+        .input-group {
+            margin: 20px 0;
+        }
+
+        input {
+            padding: 10px;
+            font-size: 16px;
+            margin-right: 10px;
+            width: 300px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Dashboard</h1>
+
+    <!-- Campos de Entrada Dinâmicos para qualquer Endpoint -->
+    <div class="input-group">
+        <label for="endpoint">Escolha o Endpoint:</label><br>
+        <select id="endpoint">
+            <!-- <option value="/getCliente/">Get Cliente</option>
+            <option value="/getFatura/">Get Fatura</option>
+            <option value="/getLinhas/">Get Linhas</option>
+            <option value="/getIdFacturaDirecta/">Get Id Factura Directa</option>
+            <option value="/getOrcamento/">Get Orcamento</option>
+            <option value="/getLinhasOrcamento/">Get Linhas Orcamento</option>
+            <option value="/getNotasEntrega/">Get Notas Entrega</option>
+            <option value="/getLinhasNotasEntrega/">Get Linhas Notas Entrega</option>
+            <option value="/getNotaCredito/">Get Nota Credito</option>
+            <option value="/getLinhasNotaCredito/">Get Linhas Nota Credito</option> -->
+            <option value="/insertProducts/">insert Produtos</option>
+            <option value="/insertClient/">Insert Client</option>
+            <option value="/insertFatura/">Insert Fatura</option>
+            <option value="/rectificarFatura/">Insert Fatura Rectificativa</option>
+            <option value="/sendByEmail/">Send by Email</option>
+            <option value="/insertOrcamento/">Insert Orcamento</option>
+            <option value="/insertNotaEntrega/">Insert Nota Entrega</option>
+        </select>
+    </div>
+
+    <div class="input-group">
+        <label for="code">Insira o código Mywhere:</label><br>
+        <input type="text" id="code" placeholder="Digite o código Mywhere">
+    </div>
+
+    <button onclick="callGet()">Enviar Dados</button>
+
+    <div id="output"></div>
+
+    <script>
+        // Função para enviar a requisição para o endpoint selecionado
+        async function callGet() {
+            const endpoint = document.getElementById('endpoint').value; // Obtém o endpoint escolhido
+            const code = document.getElementById('code').value.trim(); // Obtém o código inserido pelo usuário
+            const output = document.getElementById('output');
+
+            // Verifica se o código foi preenchido
+            /* if (!code) {
+                output.innerText = 'Por favor, insira um código antes de enviar.';
+                return;
+            } */
+            // Cria o corpo da requisição no formato desejado
+            const payload = JSON.stringify({
+                Mywhere: code // "Mywhere" com o valor inserido pelo usuário
+            });
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST', // Método POST para enviar os dados
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: payload, // Envia o corpo da requisição
+                });
+                if (response.ok) {
+                    const result = await response.json(); // Aguarda a resposta JSON
+
+                    // Verifica se o resultado é um array
+                    if (Array.isArray(result)) {
+
+
+                        output.innerText = `Resposta de ${endpoint}:\n\n` + JSON.stringify(result, null, 2);
+                    } else if (result.message) {
+                        // Caso seja uma resposta única com uma mensagem
+                        output.innerText = `Resposta de ${endpoint}:\n\n` + result.message;
+                    } else {
+                        // Exibe o resultado caso não seja um array nem contenha uma mensagem
+                        output.innerText = `Resposta de ${endpoint}:\n\n` + JSON.stringify(result, null, 2);
+                    }
+                } else {
+                    // Quando houver erro (cliente já existe ou outro erro do servidor)
+                    const errorText = await response.text();
+                    output.innerText = `Erro ao chamar ${endpoint}:\n\n` + errorText;
+                }
+
+                /*  const text = await response.text(); // Obtém a resposta do servidor
+                 output.innerText = `Resposta de ${endpoint}:\n\n` + text; */
+            } catch (error) {
+                output.innerText = `Erro ao chamar ${endpoint}:\n\n` + error.message;
+            }
+        }
+    </script>
+</body>
+
+</html>
